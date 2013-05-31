@@ -1,0 +1,12 @@
+# Blender v2.66 (sub 1) OBJ File: ''
+# www.blender.org
+mtllib simple3.mtl
+o Plane_Plane.001
+v 1.679225 0.260323 -0.971831
+v 0.683783 -1.531436 -1.078550
+v -0.035017 1.173154 -0.307896
+v -1.030459 -0.618605 -0.414615
+usemtl None
+s off
+f 2 1 3
+f 4 2 3
