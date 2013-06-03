@@ -123,11 +123,42 @@ public class ObjLoader {
         return vertexs.toArray(new Vertex[]{});
     }
 
+    Vertex[] getTextureCoods() {
+        return textureCoods.toArray(new Vertex[]{});
+    }
+
+    short[] getTextureCoodsIndex() {
+        if (!textureIndexes.isEmpty()) {
+            short[] value = new short[textureIndexes.size()];
+
+            for (int i = 0; i < value.length; i++) {
+                value[i] = textureIndexes.get(i);
+            }
+
+            return value;
+        }
+        return null;
+    }
+
     public byte[] getDrawOrderIndex() {
         byte[] value = new byte[vertexIndexes.size()];
 
         for (int i = 0; i < value.length; i++) {
             value[i] = vertexIndexes.get(i).byteValue();
+        }
+
+        return value;
+    }
+
+    public float[] getTextureCoodsArray() {
+        Vertex[] textureCoods = getTextureCoods();
+        short[] index = getTextureCoodsIndex();
+        float[] value = new float[index.length * 2];
+
+        for (int i = 0; i < index.length; i++) {
+            Vertex v = textureCoods[index[i]];
+            value[i * 2] = v.x;
+            value[i * 2 + 1] = v.y;
         }
 
         return value;

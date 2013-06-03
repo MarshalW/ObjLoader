@@ -23,11 +23,13 @@ import static android.opengl.GLES20.*;
  */
 public class Mesh {
 
+    private int[] textureId;
+
     private Vertex[] vertexes;
 
     private Shader shader;
 
-    private FloatBuffer vertexBuffer;
+    private FloatBuffer vertexBuffer, textureCoordBuffer;
 
     ByteBuffer indexArray;
 
@@ -55,6 +57,32 @@ public class Mesh {
         return builder.toString();
     }
 
+    public void loadTexture(Bitmap texture) {
+        if (textureId == null) {
+            //创建纹理指针
+            textureId = new int[1];
+            glGenTextures(1, textureId, 0);
+
+            //绑定纹理
+            glBindTexture(GL_TEXTURE_2D, textureId[0]);
+
+            //设置纹理滤镜
+            glTexParameterf(GL_TEXTURE_2D,
+                    GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameterf(GL_TEXTURE_2D,
+                    GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameterf(GL_TEXTURE_2D,
+                    GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameterf(GL_TEXTURE_2D,
+                    GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        }
+
+        //加入纹理
+        glEnable(GL_TEXTURE_2D);
+        GLUtils.texImage2D(GL_TEXTURE_2D, 0, texture, 0);
+        glDisable(GL_TEXTURE_2D);
+    }
+
     public void draw(float[] projectionMatrix) {
         if (vertexes == null) {
             return;
@@ -71,13 +99,26 @@ public class Mesh {
                 0, vertexBuffer);
         glEnableVertexAttribArray(aPosition);
 
+        int aTextureCoord = this.shader.getHandle("aTextureCoord");
+        glVertexAttribPointer(aTextureCoord, 2, GL_FLOAT, false,
+                0, textureCoordBuffer);
+        glEnableVertexAttribArray(aTextureCoord);
+
         indexArray.position(0);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, indexArray);
     }
 
     public void setVertexes(Vertex[] vertexes) {
         this.vertexes = vertexes;
-        vertexBuffer = ByteBuffer.allocateDirect(3 * vertexes.length * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        vertexBuffer = ByteBuffer.allocateDirect(3 * vertexes.length * 4)
+                .order(ByteOrder.nativeOrder()).asFloatBuffer();
+    }
+
+    public void setTextureCoord(float[] textureCoord) {
+        textureCoordBuffer = ByteBuffer.allocateDirect(2 * textureCoord.length * 4)
+                .order(ByteOrder.nativeOrder()).asFloatBuffer();
+        textureCoordBuffer.put(textureCoord);
+        textureCoordBuffer.position(0);
     }
 
     public void clear() {
@@ -96,5 +137,6 @@ public class Mesh {
         }
 
         this.vertexBuffer.position(0);
+
     }
 }

@@ -1,6 +1,8 @@
 package com.example.ObjLoader;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -15,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import static android.opengl.GLES20.*;
+import static android.opengl.GLES20.glVertexAttribPointer;
 
 public class MyActivity extends Activity implements GLSurfaceView.Renderer {
 
@@ -47,7 +50,7 @@ public class MyActivity extends Activity implements GLSurfaceView.Renderer {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        objLoader = new ObjLoader(this, "cube");
+        objLoader = new ObjLoader(this, "simple2");
         objLoader.load();
 
         surfaceView = new GLSurfaceView(this);
@@ -89,6 +92,8 @@ public class MyActivity extends Activity implements GLSurfaceView.Renderer {
 
         mesh.setVertexes(objLoader.getVertexes());
         mesh.setDrawOrderIndex(objLoader.getDrawOrderIndex());
+
+
     }
 
 
@@ -111,12 +116,22 @@ public class MyActivity extends Activity implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 gl10) {
+        try {
+            Bitmap texture= BitmapFactory.decodeStream(getAssets().open("h.png"));
+            mesh.loadTexture(texture);
+            texture.recycle();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         glClear(GL_COLOR_BUFFER_BIT);
 
         Matrix.setIdentityM(modelMatrix, 0);
 
         Matrix.multiplyMM(mvpMatrix, 0, viewMatrix, 0, modelMatrix, 0);
         Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, mvpMatrix, 0);
+
+        mesh.setTextureCoord(objLoader.getTextureCoodsArray());
 
         mesh.draw(mvpMatrix);
     }
